@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carter School - Day 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a2e;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            max-height: 800px;
+            position: relative;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.3);
+            overflow: hidden;
+        }
+
+        /* Opening Screen Styles */
+        #opening-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('bg/school_gate.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            text-align: center;
+            padding: 40px;
+        }
+
+        #game-title {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 105, 180, 0.7);
+            color: #ff69b4;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        #game-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            color: #f8f8f8;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        #play-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff85a2);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        #play-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.6);
+        }
+
+        /* Game Screen Styles */
+        #game-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+        }
+
+        #background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease;
+            z-index: 1;
+        }
+
+        #characters {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .character {
+            position: absolute;
+            bottom: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            max-height: 80%;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .character-left {
+            left: 5%;
+        }
+
+        .character-right {
+            right: 5%;
+        }
+
+        .character-center {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #dialogue-box {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-top: 3px solid #ff85a2;
+            padding: 20px;
+            z-index: 3;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #character-name {
+            font-weight: bold;
+            color: #ff85a2;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        #dialogue-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        #choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            background-color: #ff85a2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1rem;
+        }
+
+        .choice-btn:hover {
+            background-color: #ff6b93;
+        }
+
+        #menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 5;
+            display: flex;
+            gap: 10px;
+        }
+
+        .menu-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        #save-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            z-index: 5;
+            display: none;
+        }
+
+        #next-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #ff85a2;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #next-btn:hover {
+            background-color: #ff6b93;
+        }
+
+        #day-indicator {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            z-index: 5;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Opening Screen -->
+        <div id="opening-screen">
+            <h1 id="game-title">CARTER SCHOOL</h1>
+            <p id="game-subtitle">A magical high school romance where your choices shape your destiny. Meet intriguing characters, forge friendships, and discover secrets in this enchanting academy.</p>
+            <button id="play-btn">START DAY 1</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen">
+            <div id="background"></div>
+            
+            <div id="characters">
+                <!-- Characters will be dynamically added here -->
+            </div>
+            
+            <div id="dialogue-box">
+                <div id="character-name"></div>
+                <div id="dialogue-text"></div>
+                <div id="choices"></div>
+            </div>
+            
+            <div id="next-btn">▶</div>
+            
+            <div id="menu">
+                <button class="menu-btn" id="save-btn">Save</button>
+                <button class="menu-btn" id="load-btn">Load</button>
+                <button class="menu-btn" id="settings-btn">Settings</button>
+            </div>
+            
+            <div id="save-indicator">Game Saved!</div>
+            <div id="day-indicator">DAY 1</div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            currentScene: 0,
+            currentDialogue: 0,
+            relationshipPoints: {
+                Marf: 0,
+                Lula: 0,
+                Jude: 0,
+                JM: 0
+            },
+            currentBackground: '',
+            currentCharacters: [],
+            savedGame: null
+        };
+
+        // Background images - using your actual files
+        const backgrounds = {
+            classroom: 'bg/classroom.png',
+            cafeteria: 'bg/cafeteria.png',
+            rooftop: 'bg/rooftop.png',
+            gate: 'bg/school_gate.png',
+            library: 'bg/library.png',
+            hallway: 'bg/school_gate.png' // Using gate as hallway for now
+        };
+
+        // Character sprites - using your actual sprite files
+        const characterSprites = {
+            Carter: {
+                neutral: 'sprite/carter_neutral.png',
+                happy: 'sprite/carter_happy.png',
+                sad: 'sprite/carter_sad.png',
+                blush: 'sprite/carter_blush.png',
+                angry: 'sprite/carter_angry.png',
+                surprised: 'sprite/carter_surprised.png'
+            },
+            Marf: {
+                neutral: 'sprite/marf_neutral.png',
+                happy: 'sprite/marf_happy.png',
+                sad: 'sprite/marf_sad.png',
+                blush: 'sprite/marf_blush.png',
+                angry: 'sprite/marf_angry.png',
+                surprised: 'sprite/marf_surprised.png'
+            },
+            Lula: {
+                neutral: 'sprite/lula_neutral.png',
+                happy: 'sprite/lula_happy.png',
+                sad: 'sprite/lula_sad.png',
+                blush: 'sprite/lula_blush.png',
+                angry: 'sprite/lula_angry.png',
+                surprised: 'sprite/lula_surprised.png'
+            },
+            Jude: {
+                neutral: 'sprite/jude_neutral.png',
+                happy: 'sprite/jude_happy.png',
+                sad: 'sprite/jude_sad.png',
+                blush: 'sprite/jude_blush.png',
+                angry: 'sprite/jude_angry.png',
+                surprised: 'sprite/jude_surprised.png'
+            },
+            JM: {
+                neutral: 'sprite/jm_neutral.png',
+                happy: 'sprite/jm_happy.png',
+                sad: 'sprite/jm_sad.png',
+                blush: 'sprite/jm_blush.png',
+                angry: 'sprite/jm_angry.png',
+                surprised: 'sprite/jm_surprised.png'
+            }
+        };
+
+        // Story script for Day 1
+        const storyScript = [
+            // Scene 0: Introduction - School Gate
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'center' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Carter',
+                        text: 'Here I am... Carter School. My first day at this prestigious academy. Mom was so excited when I got accepted, but honestly, I\'m pretty nervous.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'They say this school has a special program for students with... unique talents. I wonder what they mean by that.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Well, no point standing here all day. Time to face whatever awaits inside.'
+                    }
+                ]
+            },
+            
+            // Scene 1: Entrance Hall
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Carter',
+                        text: 'Wow, the entrance is even more impressive up close. Look at those detailed carvings on the doors!'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'As you look around in awe, you notice a student council member handing out orientation packets.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Excuse me, could I get one of those?'
+                    },
+                    {
+                        character: 'Student Council',
+                        text: 'Of course! Welcome to Carter School. Your homeroom is 2-B, just down the main hallway to your left.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thank you! Um, is there anything special I should know about this school?'
+                    },
+                    {
+                        character: 'Student Council',
+                        text: 'You\'ll learn everything in orientation. But let\'s just say... keep an open mind. Carter School has its own unique traditions.'
+                    }
+                ]
+            },
+            
+            // Scene 2: Hallway - Meeting Marf
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Marf', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Carter',
+                        text: 'Okay, main hallway to the left... room 2-B... I hope I can find it without getting lost.'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'You look lost. First day?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Yeah, is it that obvious? I\'m looking for room 2-B.'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'That\'s my homeroom too. I\'m Marf. Follow me.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks! I\'m Carter. Nice to meet you.'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'Likewise. So what brings you to Carter School? Most students here have been in the program since middle school.'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'I was recruited for some special program. Still not sure what it\'s about.',
+                        effect: { Marf: 2 }
+                    },
+                    {
+                        text: 'Just regular admission. My parents wanted me to come here.',
+                        effect: { Marf: 0 }
+                    },
+                    {
+                        text: 'I have my reasons. Let\'s just leave it at that for now.',
+                        effect: { Marf: -1 }
+                    }
+                ]
+            },
+            
+            // Scene 3: Homeroom - Meeting Lula
+            {
+                background: backgrounds.classroom,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Lula', expression: 'happy', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Marf',
+                        text: 'Here we are. 2-B. I\'ll see you around, Carter.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks again for the help.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'Hi there! Are you the new student? I\'m Lula! Welcome to our class!'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Wow, you\'re energetic. Yeah, I\'m Carter. Nice to meet you.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'We don\'t get many transfers mid-year! You must be really special! What\'s your talent?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Talent? What do you mean?'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'Oh! You don\'t know yet? This school is for students with... special abilities! I can talk to animals!'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'Wait, seriously? That\'s amazing! Tell me more!',
+                        effect: { Lula: 3 }
+                    },
+                    {
+                        text: 'Special abilities? Is this some kind of joke?',
+                        effect: { Lula: -2 }
+                    },
+                    {
+                        text: 'I think there\'s been a misunderstanding. I don\'t have any special abilities.',
+                        effect: { Lula: 0 }
+                    }
+                ]
+            },
+            
+            // Scene 4: Morning Classes
+            {
+                background: backgrounds.classroom,
+                characters: [
+                    { name: 'Carter', expression: 'surprised', position: 'center' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Teacher',
+                        text: 'Good morning, class. Before we begin, I\'d like to welcome our new student, Carter. Please make him feel welcome.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks... nice to meet everyone.'
+                    },
+                    {
+                        character: 'Teacher',
+                        text: 'Today we\'ll be discussing energy manipulation basics. Remember, focus is key when channeling your abilities.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Energy manipulation? This really is a special school...'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'You watch in amazement as students demonstrate various abilities - one creates small light orbs, another makes a pencil float.'
+                    }
+                ]
+            },
+            
+            // Scene 5: Cafeteria - Lunch Time
+            {
+                background: backgrounds.cafeteria,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Lula', expression: 'happy', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Lula',
+                        text: 'Carter! Over here! Save me a seat!'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Hey Lula. This cafeteria is huge! And the food looks... interesting.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'Oh, the menu is specially designed to help with our energy levels when using our abilities! Try the blue mashed potatoes - they enhance psychic receptivity!'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Blue mashed potatoes? Okay then... So, tell me more about this school. How long have you been here?'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'Since first year! My family has always had an affinity with animals. My grandmother could understand birds, and my mother communicates with forest spirits!'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'That\'s incredible! What animals can you talk to?',
+                        effect: { Lula: 2 }
+                    },
+                    {
+                        text: 'Forest spirits? Now you\'re just making things up.',
+                        effect: { Lula: -3 }
+                    },
+                    {
+                        text: 'I\'m still processing all this. It\'s a lot to take in.',
+                        effect: { Lula: 1 }
+                    }
+                ]
+            },
+            
+            // Scene 6: Library - Meeting Jude
+            {
+                background: backgrounds.library,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Jude', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Carter',
+                        text: 'The library is incredible. So many books... and some of these titles are really unusual. "Elemental Manipulation for Beginners"? "Telepathy Theory"?'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'First time seeing our curriculum texts?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Yeah, I just transferred here. I\'m still trying to wrap my head around all this "special abilities" stuff.'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'I\'m Jude. I oversee the library archives. If you have questions about our... unique curriculum, I might be able to help.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks, Jude. So is it true? Do students here really have supernatural abilities?'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'We prefer the term "enhanced aptitudes." And yes, it\'s quite real. My own specialty is bibliomancy - divination through books.'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'That sounds fascinating! Can you show me how it works?',
+                        effect: { Jude: 3 }
+                    },
+                    {
+                        text: 'This is all too much. I think I need to sit down.',
+                        effect: { Jude: 1 }
+                    },
+                    {
+                        text: 'I\'m still not convinced this isn\'t some elaborate prank.',
+                        effect: { Jude: -2 }
+                    }
+                ]
+            },
+            
+            // Scene 7: Rooftop - Meeting JM
+            {
+                background: backgrounds.rooftop,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'JM', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Carter',
+                        text: 'I needed some air after all that. The view from up here is amazing.'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'It\'s the best spot in the school. You can see the whole campus and the forest beyond.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Oh, sorry, I didn\'t know anyone was up here. I\'m Carter.'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'JM. Nice to meet you. You must be new - not many people know about this place.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Yeah, first day. Still trying to process everything about this school.'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'The whole "special abilities" thing? It takes some getting used to. When I first came here, I thought it was all nonsense too.'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'So it\'s real? What\'s your ability?',
+                        effect: { JM: 3 }
+                    },
+                    {
+                        text: 'I\'m still not convinced. This has to be some kind of mass delusion.',
+                        effect: { JM: 0 }
+                    },
+                    {
+                        text: 'I believe it, I just don\'t understand why I\'m here. I don\'t have any special talents.',
+                        effect: { JM: 2 }
+                    }
+                ]
+            },
+            
+            // Scene 8: Afternoon Classes
+            {
+                background: backgrounds.classroom,
+                characters: [
+                    { name: 'Carter', expression: 'surprised', position: 'center' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Teacher',
+                        text: 'This afternoon we\'ll be practicing basic energy control. Remember to breathe deeply and focus your intent.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Energy control? What does that even mean?'
+                    },
+                    {
+                        character: 'Teacher',
+                        text: 'New students, please observe for now. You\'ll have your assessment later today to determine your starting level.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'You watch in amazement as various students demonstrate their abilities. One creates small orbs of light, another makes objects float, and Lula seems to be having a silent conversation with a bird outside the window.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'This is unbelievable. They\'re actually doing it. All of it\'s real.'
+                    }
+                ]
+            },
+            
+            // Scene 9: Assessment
+            {
+                background: backgrounds.classroom,
+                characters: [
+                    { name: 'Carter', expression: 'nervous', position: 'center' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Assessor',
+                        text: 'Carter, please step forward for your assessment. Don\'t be nervous - we\'re just going to measure your innate energy levels.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'I really don\'t think this is necessary. I\'m pretty sure I\'m just a normal person.'
+                    },
+                    {
+                        character: 'Assessor',
+                        text: 'The fact that you were accepted to Carter School means our screening detected something. Let\'s find out what it is.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'You stand in the center of the room as the assessor uses various crystals and devices to measure your energy.'
+                    },
+                    {
+                        character: 'Assessor',
+                        text: 'Interesting... very interesting indeed. Your energy signature is unusual - latent but powerful. I believe you have empathic abilities.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Empathic? You mean... reading emotions?'
+                    },
+                    {
+                        character: 'Assessor',
+                        text: 'More than that. True empaths can sense, influence, and sometimes even absorb the emotions of others. It\'s a rare and powerful gift.'
+                    }
+                ]
+            },
+            
+            // Scene 10: End of Day Decision
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'contemplative', position: 'center' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Narrator',
+                        text: 'The school day is over. You\'ve discovered you have empathic abilities and met several interesting people. Who would you like to walk home with?'
+                    }
+                ],
+                choices: [
+                    {
+                        text: 'Walk with Marf - he seems cool and grounded',
+                        nextScene: 11,
+                        effect: { Marf: 3 }
+                    },
+                    {
+                        text: 'Go with Lula - her energy is infectious',
+                        nextScene: 12,
+                        effect: { Lula: 3 }
+                    },
+                    {
+                        text: 'Accompany Jude - he might have answers to my questions',
+                        nextScene: 13,
+                        effect: { Jude: 3 }
+                    },
+                    {
+                        text: 'Head out with JM - he seems like he understands my confusion',
+                        nextScene: 14,
+                        effect: { JM: 3 }
+                    }
+                ]
+            },
+            
+            // Scene 11: Walking with Marf
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Marf', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Marf',
+                        text: 'Heading out? Mind if I walk with you?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Sure, that would be nice. It\'s been quite a day.'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'Tell me about it. The first day is always intense, especially when you\'re new to all this.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'You seem to take it all in stride. How long have you known about your abilities?'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'Since I was a kid. My family are all technopaths - we can interface with machines. But it\'s different for everyone.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Technopath? That sounds useful. The assessor thinks I might be an empath.'
+                    },
+                    {
+                        character: 'Marf',
+                        text: 'Empaths are rare. That explains why you were accepted without prior training. If you need help adjusting, let me know.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks, Marf. I appreciate that.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'DAY 1 COMPLETE - Your relationship with Marf has improved!'
+                    }
+                ]
+            },
+            
+            // Scene 12: Walking with Lula
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Lula', expression: 'happy', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Lula',
+                        text: 'Carter! Wait up! Are you walking home? Can I join you?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Hey Lula. Sure, the company would be nice.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'So what did you think of your first day? Isn\'t this school amazing?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'It\'s... a lot to take in. The assessor thinks I might be an empath.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'An empath! That\'s so cool! You can probably tell how excited I am right now!'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Yeah, I\'m getting that. You\'re practically radiating happiness.'
+                    },
+                    {
+                        character: 'Lula',
+                        text: 'We should practice together! I can help you with basic energy control!'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'I\'d like that. Thanks, Lula.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'DAY 1 COMPLETE - Your relationship with Lula has improved!'
+                    }
+                ]
+            },
+            
+            // Scene 13: Walking with Jude
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'Jude', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'Jude',
+                        text: 'Carter. I understand you have questions about your assessment results.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Jude. Yeah, the empath thing. Does that mean what I think it means?'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'Empathic abilities vary widely. At basic levels, you might simply be more sensitive to emotions. At advanced levels... well, the possibilities are fascinating.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'The assessor said I might be able to influence emotions too. That sounds... concerning.'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'All abilities carry responsibility. The library has several texts on empathic development I could recommend.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'I\'d appreciate that. This is all pretty overwhelming.'
+                    },
+                    {
+                        character: 'Jude',
+                        text: 'It is for most. But you seem to be handling it better than many. That in itself might be a sign of your potential.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'DAY 1 COMPLETE - Your relationship with Jude has improved!'
+                    }
+                ]
+            },
+            
+            // Scene 14: Walking with JM
+            {
+                background: backgrounds.gate,
+                characters: [
+                    { name: 'Carter', expression: 'neutral', position: 'left' },
+                    { name: 'JM', expression: 'neutral', position: 'right' }
+                ],
+                dialogue: [
+                    {
+                        character: 'JM',
+                        text: 'Tough first day?'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'You could say that. They think I\'m an empath.'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'Ah, that explains it. Empaths usually have the roughest adjustment period.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Why is that?'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'You\'re suddenly aware of everyone\'s emotions, including stuff people try to hide. It can be overwhelming until you learn to filter it.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'That sounds... intense. How do you know so much about it?'
+                    },
+                    {
+                        character: 'JM',
+                        text: 'My older sister is an empath. I saw what she went through. If you need someone to talk to who gets it, I\'m around.'
+                    },
+                    {
+                        character: 'Carter',
+                        text: 'Thanks, JM. That means a lot.'
+                    },
+                    {
+                        character: 'Narrator',
+                        text: 'DAY 1 COMPLETE - Your relationship with JM has improved!'
+                    }
+                ]
+            }
+        ];
+
+        // DOM elements
+        const openingScreen = document.getElementById('opening-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const playBtn = document.getElementById('play-btn');
+        const backgroundEl = document.getElementById('background');
+        const charactersEl = document.getElementById('characters');
+        const characterNameEl = document.getElementById('character-name');
+        const dialogueTextEl = document.getElementById('dialogue-text');
+        const choicesEl = document.getElementById('choices');
+        const nextBtn = document.getElementById('next-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const loadBtn = document.getElementById('load-btn');
+        const saveIndicatorEl = document.getElementById('save-indicator');
+
+        // Initialize game
+        function initGame() {
+            playBtn.addEventListener('click', startGame);
+            nextBtn.addEventListener('click', nextDialogue);
+            saveBtn.addEventListener('click', saveGame);
+            loadBtn.addEventListener('click', loadGame);
+        }
+
+        // Start the game
+        function startGame() {
+            openingScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            loadScene(0);
+        }
+
+        // Load a scene
+        function loadScene(sceneIndex) {
+            gameState.currentScene = sceneIndex;
+            gameState.currentDialogue = 0;
+            
+            const scene = storyScript[sceneIndex];
+            
+            // Set background
+            backgroundEl.style.backgroundImage = `url('${scene.background}')`;
+            
+            // Clear characters
+            charactersEl.innerHTML = '';
+            
+            // Add characters
+            scene.characters.forEach(char => {
+                const charEl = document.createElement('img');
+                charEl.className = `character character-${char.position}`;
+                charEl.src = characterSprites[char.name][char.expression];
+                charEl.alt = char.name;
+                charEl.style.height = '80%';
+                charactersEl.appendChild(charEl);
+            });
+            
+            // Display first dialogue
+            displayDialogue();
+        }
+
+        // Display current dialogue
+        function displayDialogue() {
+            const scene = storyScript[gameState.currentScene];
+            const dialogue = scene.dialogue[gameState.currentDialogue];
+            
+            characterNameEl.textContent = dialogue.character;
+            dialogueTextEl.textContent = dialogue.text;
+            
+            // Clear choices
+            choicesEl.innerHTML = '';
+            
+            // Show choices if available at this dialogue point
+            if (scene.choices && gameState.currentDialogue === scene.dialogue.length - 1) {
+                scene.choices.forEach(choice => {
+                    const choiceBtn = document.createElement('button');
+                    choiceBtn.className = 'choice-btn';
+                    choiceBtn.textContent = choice.text;
+                    choiceBtn.addEventListener('click', () => makeChoice(choice));
+                    choicesEl.appendChild(choiceBtn);
+                });
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'flex';
+            }
+        }
+
+        // Advance to next dialogue
+        function nextDialogue() {
+            const scene = storyScript[gameState.currentScene];
+            
+            if (gameState.currentDialogue < scene.dialogue.length - 1) {
+                gameState.currentDialogue++;
+                displayDialogue();
+            } else if (!scene.choices) {
+                // If no choices, move to next scene
+                if (gameState.currentScene < storyScript.length - 1) {
+                    loadScene(gameState.currentScene + 1);
+                }
+            }
+        }
+
+        // Handle player choice
+        function makeChoice(choice) {
+            // Apply relationship effects
+            if (choice.effect) {
+                Object.keys(choice.effect).forEach(char => {
+                    gameState.relationshipPoints[char] += choice.effect[char];
+                });
+            }
+            
+            // Handle next scene
+            if (choice.nextScene) {
+                loadScene(choice.nextScene);
+            } else if (gameState.currentScene < storyScript.length - 1) {
+                loadScene(gameState.currentScene + 1);
+            }
+            
+            // Show next button again
+            nextBtn.style.display = 'flex';
+        }
+
+        // Save game state
+        function saveGame() {
+            gameState.savedGame = JSON.parse(JSON.stringify(gameState));
+            saveIndicatorEl.style.display = 'block';
+            setTimeout(() => {
+                saveIndicatorEl.style.display = 'none';
+            }, 2000);
+        }
+
+        // Load saved game
+        function loadGame() {
+            if (gameState.savedGame) {
+                Object.assign(gameState, JSON.parse(JSON.stringify(gameState.savedGame)));
+                loadScene(gameState.currentScene);
+            } else {
+                alert('No saved game found!');
+            }
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
